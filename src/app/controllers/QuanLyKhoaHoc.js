@@ -1,6 +1,6 @@
-import {KhoaHocService} from '../services/khoahocservice';
-import {KhoaHoc} from '../models/khoahoc';
-
+import { KhoaHocService } from '../services/khoahocservice';
+import { KhoaHoc } from '../models/khoahoc';
+import Swal from 'sweetalert2';
 
 var dsKhoaHoc = [];
 var khoaHocService = new KhoaHocService();
@@ -32,39 +32,63 @@ khoaHocService.layDSKH().then(function (res) {
         console.log(ex.message);
     })
 
-//function tạo bảng
-function taoBang(arr) {
-    var content = '';
-    for (var i = 0; i < arr.length; i++) {
-        var KH = arr[i];
-        content += `
-            <tr">
-                <td class="align-middle">${KH.MaKhoaHoc}</td>
-                <td class="align-middle">${KH.TenKhoaHoc}</td>
-                <td class="align-middle">${KH.MoTa}</td>
-                <td class="align-middle"><img src="${KH.HinhAnh}" alt="hinh anh" width="150px"></td>
-                <td class="align-middle">${KH.LuotXem}</td>
-                <td class="align-middle">${KH.NguoiTao}</td>
-                <td class="align-middle">                
-                    <a href="#formKH">
-                    <button class="btn btn-info"
-                        data-makh = "${KH.MaKhoaHoc}"
-                        data-ten = "${KH.TenKhoaHoc}"
-                        data-mota = "${KH.MoTa}"
-                        data-hinhanh = "${KH.HinhAnh}"
-                        data-luotxem = "${KH.LuotXem}"
-                        data-nguoitao = "${KH.NguoiTao}"
-                        onclick = "HienThiLenForm(event)"
-                >Cập Nhật</button>
-                    </a>
-                
-                <button class="btn btn-danger" onclick="xoaKhoaHoc('${i}')">Xóa</button>
-                </td>
-            </tr>
-        `
-    }
-    getEl('tbodyKH').innerHTML = content;
+//function xóa khóa học
+function xoaKhoaHoc(index) {
+    Swal({
+        title: 'Bạn chắc chắn?',
+        text: "Bạn không thể trở lại được ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'red',
+        cancelButtonColor: 'blue',
+        confirmButtonText: 'Ok'
+    }).then((result) => {
+        if (result.value) {
+            khoaHocService.xoaKH(dsKhoaHoc[index]).then(function (res) {
+                // console.log(res)
+                dsKhoaHoc.splice(index, 1);
+                taoBang(dsKhoaHoc);
+            })
+                .catch(function (err) {
+                    console.log(err.message);
+                })
+
+            Swal(
+                'Đã xóa!',
+                'Khóa học đã được xóa.',
+                'success'
+            )
+        }
+    })
 }
+
+window.xoaKhoaHoc = xoaKhoaHoc;
+
+// Hiển thị lại thông tin lên form
+function HienThiLenForm(event) {
+
+    var button = event.target;
+    var makh = button.getAttribute('data-makh');
+    var tenkh = button.getAttribute('data-tenkh');
+    var mota = button.getAttribute('data-mota');
+    var hinhanh = button.getAttribute('data-hinhanh');
+    var luotxem = button.getAttribute('data-luotxem');
+    var nguoitao = button.getAttribute('data-nguoitao');
+
+    getEl('maKH').value = makh;
+    getEl('tenKH').value = tenkh;
+    getEl("moTa").value = mota;
+    getEl('hinhAnh').value = hinhanh;
+    getEl('luotXem').value = luotxem;
+    getEl('nguoiTao').value = nguoitao;
+
+    getEl('maKH').setAttribute("readonly", true);
+    getEl('btnThemKH').style.display = "none";
+    getEl('btnCapNhatKH').style.display = "block";
+}
+window.HienThiLenForm = HienThiLenForm;
+
+
 
 //function tìm kiếm khóa học theo mã
 function timKiemTheoMa() {
@@ -102,16 +126,16 @@ function timKiemKhoaHoc() {
         dSHienThi = timKiemTheoTen();
     }
     if (dSHienThi.length === 0) {
-        Swal({
+        swal({
             type: 'error',
             title: 'Không tìm thấy...',
-            text: 'Khóa học không tồn tại!',            
+            text: 'Khóa học không tồn tại!',
         })
     }
     else {
         taoBang(dSHienThi);
     }
-    if(keyword==='') taoBang(dsKhoaHoc);
+    if (keyword === '') taoBang(dsKhoaHoc);
 
 }
 
@@ -135,35 +159,7 @@ function themKhoaHoc() {
         })
 }
 
-//function xóa khóa học
-function xoaKhoaHoc(index) {
-    Swal({
-        title: 'Bạn chắc chắn?',
-        text: "Bạn không thể trở lại được ?",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'red',
-        cancelButtonColor: 'blue',
-        confirmButtonText: 'Ok'
-    }).then((result) => {
-        if (result.value) {
-            khoaHocService.xoaKH(dsKhoaHoc[index]).then(function (res) {
-                // console.log(res)
-                dsKhoaHoc.splice(index, 1);
-                taoBang(dsKhoaHoc);
-            })
-                .catch(function (err) {
-                    console.log(err.message);
-                })
 
-            Swal(
-                'Đã xóa!',
-                'Khóa học đã được xóa.',
-                'success'
-            )
-        }
-    })
-}
 
 //Cập nhật khóa học
 function findIndex(arr, ma) {
@@ -189,28 +185,7 @@ function clearFormKH() {
     getEl('btnCapNhatKH').style.display = "none";
 }
 
-// Hiển thị lại thông tin lên form
-function HienThiLenForm(event) {
 
-    var button = event.target;
-    var makh = button.getAttribute('data-makh');
-    var tenkh = button.getAttribute('data-tenkh');
-    var mota = button.getAttribute('data-mota');
-    var hinhanh = button.getAttribute('data-hinhanh');
-    var luotxem = button.getAttribute('data-luotxem');
-    var nguoitao = button.getAttribute('data-nguoitao');
-
-    getEl('maKH').value = makh;
-    getEl('tenKH').value = tenkh;
-    getEl("moTa").value = mota;
-    getEl('hinhAnh').value = hinhanh;
-    getEl('luotXem').value = luotxem;
-    getEl('nguoiTao').value = nguoitao;
-
-    getEl('maKH').setAttribute("readonly", true);
-    getEl('btnThemKH').style.display = "none";
-    getEl('btnCapNhatKH').style.display = "block";
-}
 
 //function cập nhật khóa học
 function capNhatKH() {
@@ -234,6 +209,41 @@ function capNhatKH() {
         })
 }
 
-getEl('btnTimkiem').addEventListener('click',timKiemKhoaHoc);
+
+//function tạo bảng
+function taoBang(arr) {
+    var content = '';
+    for (var i = 0; i < arr.length; i++) {
+        var KH = arr[i];
+        content += `
+            <tr">
+                <td class="align-middle">${KH.MaKhoaHoc}</td>
+                <td class="align-middle">${KH.TenKhoaHoc}</td>
+                <td class="align-middle">${KH.MoTa}</td>
+                <td class="align-middle"><img src="${KH.HinhAnh}" alt="hinh anh" width="150px"></td>
+                <td class="align-middle">${KH.LuotXem}</td>
+                <td class="align-middle">${KH.NguoiTao}</td>
+                <td class="align-middle">                
+                    <a href="#formKH">
+                    <button class="btn btn-info"
+                        data-makh = "${KH.MaKhoaHoc}"
+                        data-tenkh = "${KH.TenKhoaHoc}"
+                        data-mota = "${KH.MoTa}"
+                        data-hinhanh = "${KH.HinhAnh}"
+                        data-luotxem = "${KH.LuotXem}"
+                        data-nguoitao = "${KH.NguoiTao}"
+                        onclick = "HienThiLenForm(event)"
+                >Cập Nhật</button>
+                    </a>
+                
+                <button class="btn btn-danger" onclick="xoaKhoaHoc('${i}')">Xóa</button>
+                </td>
+            </tr>
+        `
+    }
+    getEl('tbodyKH').innerHTML = content;
+}
+
+getEl('btnTimkiem').addEventListener('click', timKiemKhoaHoc);
 getEl('btnThemKH').addEventListener('click', themKhoaHoc);
 getEl('btnCapNhatKH').addEventListener('click', capNhatKH);
