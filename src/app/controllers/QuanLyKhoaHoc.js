@@ -126,7 +126,7 @@ function timKiemKhoaHoc() {
         dSHienThi = timKiemTheoTen();
     }
     if (dSHienThi.length === 0) {
-        swal({
+        Swal({
             type: 'error',
             title: 'Không tìm thấy...',
             text: 'Khóa học không tồn tại!',
