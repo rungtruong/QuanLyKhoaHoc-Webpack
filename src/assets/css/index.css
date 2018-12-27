@@ -1,0 +1,14 @@
+label{
+    font-weight: inherit;
+    /* font-style: italic; */
+}
+::placeholder{
+    font-weight: lighter;
+    font-style: italic; 
+}
+.mybtn,button{
+    margin: 0 auto;
+}
+a{
+    text-decoration: none !important;
+}
